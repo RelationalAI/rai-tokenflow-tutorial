@@ -1,0 +1,720 @@
+Question,Type,Testing,Table testing,Notes,Query,Supported by current data,,TOKEN_SNAPSHOT,,RUNNING_TOKEN_BALANCES,,VIRTUALS_AGENTS
+How many holders of AIXBT are there?,Holder,"snapshot, one token with unique name",TOKEN_SNAPSHOT,,"select holder_count from token_snapshot 
+where lower(name)='aixbt'
+order by snapshot time desc
+limit 1",Yes,,,,,,
+How many holders of Luna are there?,Holder,"snapshot, one token mith multiple similar names",TOKEN_SNAPSHOT,"There are multiple tokens with Luna in the name, so needs to pick the right one (or ask clarification question)","select holder_count from token_snapshot 
+where lower(symbol)='luna'
+order by snapshot time desc
+limit 1",Yes,,,,,,
+How many holders of $AIXBT are there?,Holder,"snapshot, one token with unique name, using crypto symbol rather than name",TOKEN_SNAPSHOT,"Needs to understand the permutations of a name e.g. VaderAI, Vader AI, $VADER, Vader, VaderAI by Virtuals are all the same token
+
+Plus various capitalizations or not e.g. aixbt, Aixbt etc","select holder_count from token_snapshot 
+where lower(symbol)='aixbt'
+order by snapshot time desc
+limit 1",Yes,,,,,,
+"How many holders currently have more than 20,000 AIXBT?",Holder,"snapshot, with relative filter, one token with unique name",RUNNING_TOKEN_BALANCES,,"with balances as (
+    select holder,
+    max_by(running_balance, balance_change_time) as balance
+    from running_token_balances b
+    left join virtuals_agents a on b.token_address=a.agent_token_address
+    where lower(a.name)='aixbt'
+    group by holder
+)
+
+select count(*) from balances
+where balance>20000",Yes,,,,,,
+"Which token has more holders, AIXBT or VaderAI?",Holder,"snapshot, comparison, two tokens with unique names",TOKEN_SNAPSHOT,,"This is easier if it can send two queries:
+
+1. select holder_count from token_snapshot 
+where lower(name)='aixbt'
+order by snapshot time desc
+limit 1
+
+2. select holder_count from token_snapshot 
+where lower(name)='vaderai'
+order by snapshot time desc
+limit 1",Yes,,,,,,
+How many holders have tokens from 5 or more Virtuals agents?,Holder,"snapshot, multi-token comparison, tokens not named",RUNNING_TOKEN_BALANCES,"Including ""Virtuals"" may confuse things since it is also a token - this is delibarate","with balances as (
+    select holder,
+    token_address,
+    max_by(running_balance, balance_change_time) as balance
+    from running_token_balances
+    group by holder, token_address
+    having balance > 0
+), 
+
+holders_with_5 as (
+    select holder,
+    count(*) as token_count
+    from balances
+    group by holder
+    having token_count >= 5
+)
+
+select count(*) from holders_with_5",Yes,,,,,,
+How many new token holders that didn't own before but now do are there for AIXBT today compared to 3 months ago?,Holder,"time comparison, complex calculation since is between two dates, one token only",RUNNING_TOKEN_BALANCES,,"with holders_3m as (
+    select holder,
+    max_by(running_balance, balance_change_time) as balance
+    from running_token_balances b
+    left join virtuals_agents a
+    on b.token_address=a.agent_token_address
+    where lower(a.name)='aixbt'
+    and balance_change_time <= dateadd('month', -3, sysdate())
+    group by holder
+    having balance > 0
+), 
+
+holders_now as (
+    select holder,
+    max_by(running_balance, balance_change_time) as balance
+    from running_token_balances b
+    left join virtuals_agents a
+    on b.token_address=a.agent_token_address
+    where a.name='aixbt'
+    group by holder
+    having balance > 0
+)
+
+select count(*) from holders_now 
+where holder not in (select holder from holders_3m)",Yes,,,,,,
+Which token has gained more new holders compared to 3 months ago - AIXBT or VaderAI?,Holder,"time comparison, complex calculation since is between two dates, across two tokens",TOKEN_SNAPSHOT,,"with holders_3m as (
+    select 
+    name,
+    max_by(holder_count, snapshot_time) as holder_3m
+    from token_snapshot
+    where lower(name) in ('aixbt', 'vaderai')
+    and snapshot_time<=dateadd('month', -3, sysdate())
+    group by name
+),
+
+holders_now as (
+    select 
+    name,
+    max_by(holder_count, snapshot_time) as holder_now
+    from token_snapshot
+    where lower(name) in ('aixbt', 'vaderai')
+    group by name
+)
+
+
+select name,
+holder_now - holder_3m as absolute_change,
+absolute_change/holder_3m*100 as relative_change
+from holders_now join holders_3m using(name)",Yes,,,,,,
+How many whales are there for AIXBT?,Holder,"snapshot, one token with unique name, needs interpretation of whale?",RUNNING_TOKEN_BALANCES + TOKEN_SNAPSHOT,"If need to interpret whale, then use more than $100,000 of tokens.","with aixbt_whales as (
+    select holder,
+    max_by(running_balance, balance_change_time) as balance,
+    balance * usd_price as balance_usd
+    from running_token_balances b
+    left join token_snapshot t  
+    on b.token_address=t.token_address
+    and t.snapshot_time=(select max(snapshot_time) from token_snapshot 
+                        where lower(name)='aixbt' and usd_price is not null
+                        )
+    where lower(t.name)='aixbt'
+    group by holder, usd_price
+    having balance_usd > 100000
+    
+)
+
+select count(*) from aixbt_whales",Yes,,,,,,
+"How many whales are there for AIXBT, VaderAI and Luna tokens?",Holder,"snapshot, comparison across three tokens, needs interpretation of whale","RUNNING_TOKEN_BALANCES 
++ TOKEN_SNAPSHOT","If need to interpret whale, then use more than $100,000 of tokens","Same as above, but 3 queries with 3 different names","Yes
+
+NOTE: No pricing for Luna at the moment, failing diffs
+decoding, just change to any other token in the query",,,,,,
+What are the three most common holdings of AIXBT holders?,Holder,"snapshot, needs intepretation, need to look across all other virtuals tokens and return ordered list",RUNNING_TOKEN_BALANCES,Intensive as need to look across all other tokens,"with aixbt_holders as (
+    select holder,
+    max_by(running_balance, balance_change_time) as balance
+    from running_token_balances b 
+    join virtuals_agents a on b.token_address=a.agent_token_address 
+    where lower(a.name)='aixbt'
+    group by holder
+    having balance > 0
+), 
+
+other_balances as (
+    select token_address,
+    name,
+    holder,
+    max_by(running_balance, balance_change_time) as balance
+    from running_token_balances b
+    join virtuals_agents a on b.token_address=a.agent_token_address
+    where lower(a.name)!='aixbt'
+    group by token_address, name, holder
+    having balance>0
+)
+
+
+select token_address, name, count(distinct holder) as holder_count,
+from other_balances
+where holder in (select holder from aixbt_holders)
+group by token_address, name
+order by holder_count desc
+limit 3",Yes,,,,,,
+What is the current price of $AIXBT?,Price,"snapshot, one token, price rather than quantity",TOKEN_SNAPSHOT,Interpretation involved,"select usd_price from token_snapshot
+where lower(name)='aixbt'
+order by snapshot_time desc
+limit 1",Yes,,,,,,
+Which token has seen the biggest price change in the last 3 months? AIXBT or VaderAI? What were the changes of each?,Price,"time comparison, two token comparison, explain the difference",TOKEN_SNAPSHOT,,"with prices_3m as (
+    select name,
+    max_by(usd_price, snapshot_time) as price_3m
+    from token_snapshot
+    where lower(name) in ('vaderai', 'aixbt')
+    and snapshot_time <= dateadd('month', -3, sysdate())
+    group by name
+), 
+
+prices_now as (
+    select name,
+    max_by(usd_price, snapshot_time) as price_now
+    from token_snapshot
+    where lower(name) in ('vaderai', 'aixbt')
+    group by name
+)
+
+select name, (price_now-price_3m)/price_3m*100 as price_change
+from prices_3m join prices_now using(name)",Yes,,,,,,
+Which Virtuals agent has seen the biggest total price increase in the last 3 months?,Price,"time comparison, open-ended (no token specified), one token only",TOKEN_SNAPSHOT,,"with prices_3m as (
+    select name,
+    token_address,
+    max_by(usd_price, snapshot_time) as price_3m
+    from token_snapshot
+    where snapshot_time <= dateadd('month', -3, sysdate())
+    group by name, token_address
+), 
+
+prices_now as (
+    select name,
+    token_address,
+    max_by(usd_price, snapshot_time) as price_now
+    from token_snapshot
+    group by name, token_address
+)
+
+select name, token_address, (price_now-price_3m)/price_3m*100 as price_change
+from prices_3m join prices_now using(name, token_address)
+order by price_change desc nulls last
+limit 1",Yes,,,,,,
+"Which 3 Virtuals agents have seen the biggest total price increase in the last 3 months? Show them in order with the beginning price, end price and percentage change",Price,"time comparison, open-ended (no token specified), three tokens, give explanation and multiple datapoints",TOKEN_SNAPSHOT,This is complex,"with prices_3m as (
+    select token_address,
+    name,
+    max_by(usd_price, snapshot_time) as price_3m
+    from token_snapshot
+    where snapshot_time <= dateadd('month', -3, sysdate())
+    and usd_price is not null
+    group by token_address, name
+),
+
+
+prices_now as (
+    select token_address,
+    name,
+    max_by(usd_price, snapshot_time) as price_now
+    from token_snapshot
+    where usd_price is not null
+    group by token_address, name
+)
+
+
+select name, price_3m, price_now,
+(price_now - price_3m)/price_3m as price_change
+from prices_now join prices_3m using(token_address, name)
+order by price_change desc
+limit 3",Yes,,,,,,
+How many people bought AIXBT in the last week?,Activity,,TOKEN_SNAPSHOT,,,"No, we don't track number of buyers, but
+I can add easily",,,,,,
+How many people sold AIXBT in the last week?,Activity,,TOKEN_SNAPSHOT,,,"No, we don't track number of sellers, but 
+I can add easily",,,,,,
+How many people bought and sold AIXBT in the last week?,Activity,,TOKEN_SNAPSHOT,,,"No, see above",,,,,,
+How many holders bought AIXBT but sold other Virtuals tokens in the last month?,Activity,,TOKEN_SNAPSHOT,,,"No, see above",,,,,,
+How many transfers were there of AIXBT in the last 30 days?,Activity,,TOKEN_SNAPSHOT,,"select sum(transfer_count) from agents.smart.token_snapshot
+where lower(name)='aixbt'
+and snapshot_time>=dateadd('day', -30, sysdate());",Yes,,,,,,
+How many AIXBT tokens were transferred in the last 30 days?,Activity,,TOKEN_SNAPSHOT,,"select sum(transfer_amount) from agents.smart.token_snapshot
+where lower(name)='aixbt'
+and snapshot_time>=dateadd('day', -30, sysdate());",Yes,,,,,,
+How much $ of AIXBT was transferred in the last 30 days,Activity,,TOKEN_SNAPSHOT,,"select sum(transfer_amount*usd_price) from agents.smart.token_snapshot
+where lower(name)='aixbt'
+and snapshot_time>=dateadd('day', -30, sysdate());",Yes,,,,,,
+Which are the top 5 agent tokens in terms of number of transfers in the last 30 days? how many transfers for each?,Activity,,TOKEN_SNAPSHOT,,"select name, 
+sum(transfer_count) as num_transfers
+from agents.smart.token_snapshot
+where snapshot_time>=dateadd('day', -30, sysdate())
+group by name
+order by num_transfers desc
+limit 5;",Yes,,,,,,
+Which are the top 5 agent tokens in terms of number of transfers in the last 30 days? how many tokens transfered for each?,Activity,,TOKEN_SNAPSHOT,,"select name, 
+sum(transfer_count) as num_transfers,
+sum(transfer_amount) as transferred_amount
+from agents.smart.token_snapshot
+where snapshot_time>=dateadd('day', -30, sysdate())
+group by name
+order by num_transfers desc
+limit 5;",Yes,,,,,,
+Which are the top 5 agent tokens in terms of number of transfers in the last 30 days? how many $ of tokens transfered for each?,Activity,,TOKEN_SNAPSHOT,,"select name, 
+sum(transfer_count) as num_transfers,
+sum(transfer_amount*usd_price) as transferred_amount_usd
+from agents.smart.token_snapshot
+where snapshot_time>=dateadd('day', -30, sysdate())
+and usd_price is not null
+group by name
+order by num_transfers desc
+limit 5;",Yes,,,,,,
+How many AIXBT tokens were minted in the last 3 months?,Activity,,TOKEN_SNAPSHOT,,"select sum(mint_amount)
+from token_snapshot
+where lower(name)='aixbt'
+and snapshot_time>=dateadd('month', -3, sysdate())",Yes,,,,,,
+How many AIXBT tokens were burned in the last 3 months?,Activity,,TOKEN_SNAPSHOT,,"select sum(burn_amount)
+from token_snapshot
+where lower(name)='aixbt'
+and snapshot_time>=dateadd('month', -3, sysdate())",Yes,,,,,,
+How correlated are VIRTUALS and AIXBT prices?,Price,,TOKEN_SNAPSHOT,,"with vaderai_prices as (
+    select
+    snapshot_time,
+    usd_price as vaderai_price
+    from token_snapshot
+    where lower(name)='vaderai'
+),
+
+aixbt_prices as (
+    select
+    snapshot_time,
+    usd_price as aixbt_price
+    from token_snapshot
+    where lower(name)='aixbt'
+)
+
+select corr(vaderai_price, aixbt_price)
+from vaderai_prices join aixbt_prices using(snapshot_time)
+where vaderai_price is not null and aixbt_price is not null",Yes (with another token),,,,,,
+Which Virtuals agent has the most holders?,Holder,,TOKEN_SNAPSHOT,,"select name, holder_count from token_snapshot
+order by snapshot_time desc,
+holder_count desc 
+limit 1",Yes,,,,,,
+"How many holders hold more than $100,000 of at least 3 Virtuals tokens? Which are the most common combinations?",Holder,,RUNNING_TOKEN_BALANCES,,"with balances as (
+    select holder,
+    token_address,
+    max_by(running_balance, balance_change_time) as balance
+    from running_token_balances
+    group by token_address, holder
+),
+
+whales as (
+    select holder,
+    b.token_address,
+    balance*usd_price as usd_balance
+    from balances b join token_snapshot t
+    on b.token_address=t.token_address
+    and t.snapshot_time=(select max(snapshot_time) from token_snapshot)
+    where usd_balance > 100000
+),
+
+
+holders_with3 as (
+    select holder, 
+    count(*) as tc
+    from whales
+    group by holder
+    having tc>=3
+),
+
+
+balances_whales_with3 as (
+    select w.* from whales w
+    join holders_with3 using(holder)
+),
+
+triplets AS (
+    SELECT 
+          t1.holder AS holder, 
+          t1.token_address AS token1,
+          t2.token_address AS token2,
+          t3.token_address as token3
+    FROM balances_whales_with3 t1
+    JOIN balances_whales_with3 t2
+       ON t1.holder = t2.holder
+      AND t1.token_address < t2.token_address
+    JOIN balances_whales_with3 t3
+       ON t1.holder = t3.holder
+      AND t2.token_address < t3.token_address
+)
+
+select a1.name as token_1,
+a2.name as token_2,
+a3.name as token_3,
+count(distinct holder) as holder_count
+from triplets t
+join virtuals_agents a1 on token1=a1.agent_token_address
+join virtuals_agents a2 on token2=a2.agent_token_address
+join virtuals_agents a3 on token3=a3.agent_token_address
+group by token1, token2, token3, a1.name, a2.name, a3.name
+order by holder_count desc
+limit 10;",Yes,,,,,,
+Which Agent tokens does address 0x... hold?,Holder,,RUNNING_TOKEN_BALANCES,,"select token,
+max_by(running_balance, balance_change_time) as balance
+from running_token_balances
+where holder='0x...'
+having balance>0",Yes,,,,,,
+How many Virtuals agents tokens are there in circulation in total?,Supply,,TOKEN_SNAPSHOT,"This is for all Virtuals tokens so needs to interpret that mean that, not just $VIRTUALS",,Yes,,,,,,
+How many tokens are there in circulation for VaderAI?,Supply,,TOKEN_SNAPSHOT,,"select total_supply
+from token_snapshot
+where lower(name)='vaderai'
+order by snapshot_time desc 
+limit 1;",Yes,,,,,,
+What is the total value locked (TVL) of AIXBT?,Value,,TOKEN_SNAPSHOT,,"select tvl
+from token_snapshot
+where lower(name)='aixbt'
+order by snapshot_time desc 
+limit 1;",Yes,,,,,,
+What is the total value locked (TVL) of the three biggest agent tokens? What are they and how much for each of the top 3?,Value,,TOKEN_SNAPSHOT,,"select name, tvl
+from token_snapshot
+order by snapshot_time desc,
+tvl desc nulls last
+limit 3;",Yes,,,,,,
+How much has TVL of AIXBT increased in the last  3 months?,Value,,TOKEN_SNAPSHOT,,"with tvl_3m as (
+    select name, tvl as tvl_3m
+    from token_snapshot
+    where lower(name)='aixbt'
+    and snapshot_time <= dateadd('month', -3, sysdate())
+    order by snapshot_time desc
+    limit 1
+),
+
+tvl_now as (
+    select name, tvl as tvl_now
+    from token_snapshot
+    where lower(name)='aixbt'
+    order by snapshot_time desc
+    limit 1
+)
+
+select tvl_now - tvl_3m from tvl_3m join tvl_now using(name)",Yes,,,,,,
+Which token has seen the biggest increase in total value locked (TVL) over the last month? Which one and by how much?,Value,,TOKEN_SNAPSHOT,,"with tvls_1m as (
+    select name, token_address, max_by(tvl, snapshot_time) as tvl_1m
+    from token_snapshot
+    where snapshot_time <= dateadd('month', -1, sysdate())
+    and tvl is not null
+    group by name, token_address
+),
+
+tvls_now as (
+    select name, token_address, max_by(tvl, snapshot_time) as tvl_now
+    from token_snapshot
+    where tvl is not null
+    group by name, token_address
+)
+
+select name, token_address,
+tvl_now - tvl_1m as tvl_diff 
+from tvls_1m join tvls_now using(name, token_address)
+order by tvl_diff desc
+limit 1",Yes,,,,,,
+What is the market cap of AIXBT?,Value,,TOKEN_SNAPSHOT,(Similar to TVL question),"select 
+total_supply*usd_price as market_cap
+from token_snapshot
+where lower(name)='aixbt';",Yes,,,,,,
+What is the market cap of the three biggest agent tokens? What are they and how much for each of the top 3?,Value,,TOKEN_SNAPSHOT,(Similar to TVL question),"select name, token_address,
+total_supply*usd_price as market_cap
+from token_snapshot
+order by snapshot_time desc, market_cap desc nulls last
+limit 3",,,,,,,
+How much has market cap of AIXBT increased in the last  3 months?,Value,,TOKEN_SNAPSHOT,(Similar to TVL question),"with mc_3m as (
+    select name, total_supply*usd_price as mc_3m
+    from token_snapshot
+    where lower(name)='aixbt'
+    and snapshot_time <= dateadd('month', -3, sysdate())
+    order by snapshot_time desc
+    limit 1
+),
+
+mc_now as (
+    select name,total_supply*usd_price as mc_now
+    from token_snapshot
+    where lower(name)='aixbt'
+    order by snapshot_time desc
+    limit 1
+)
+
+select mc_now - mc_3m from mc_3m join mc_now using(name)",Yes,,,,,,
+What is the token address for VaderAI?,Metadata,,VIRTUALS_AGENTS,,"select agent_token_address from agents.smart.virtuals_agents
+where lower(name)='vaderai';",Yes,,,,,,
+What is VaderAI?,Metadata,,VIRTUALS_AGENTS,Should return the `Description`,"select description from agents.smart.virtuals_agents
+where lower(name)='vaderai';",Yes,,,,,,
+When was Vader AI launched?,Metadata,,VIRTUALS_AGENTS,,"select created_at from agents.smart.virtuals_agents
+where lower(name)='vaderai';",Yes,,,,,,
+What are the twitter handles for AIXBT and Luna?,Metadata,,VIRTUALS_AGENTS,,"select name, x_username from agents.smart.virtuals_agents
+where lower(name) in ('aixbt', 'luna')","Yes (for some reason we're not getting the X username for aixbt
+from the API. I will check) 
+",,,,,,
+How many Sentient virtuals agents are there?,Metadata,,VIRTUALS_AGENTS,,,"We have no clear indication in the Virtuals API data
+ if an agent is sentient or not. 
+Might be inferrable from other fields but I'm not sure.",,,,,,
+How many Prototype virtuals agents are there?,Metadata,,VIRTUALS_AGENTS,,,"We have no clear indication in the Virtuals API data
+ if an agent is sentient or not. 
+Might be inferrable from other fields but I'm not sure.",,,,,,
+How many Sentient virtuals agents have launched in the last 3 months?,Metadata,,VIRTUALS_AGENTS,,,"We have no clear indication in the Virtuals API data
+ if an agent is sentient or not. 
+Might be inferrable from other fields but I'm not sure.",,,,,,
+What is the agent wallet for Luna?,Metadata,,VIRTUALS_AGENTS,,"select tba from agents.smart.virtuals_agents
+where lower(name)='luna';","Yes, but what we get from TBA field, which should be the 
+agent wallet, is not what Luna actually operates from
+(as seen by terminal). That address is nowhere in the Virtuals 
+metadata.",,,,,,
+What is the token symbol for Luna by Virtuals?,Metadata,,VIRTUALS_AGENTS,,"select symbol from agents.smart.virtuals_agents
+where lower(name)='luna';",Yes,,,,,,
+How many transactions of AIXBT have there been each month between December 2024 and February 2025?,,,TOKEN_SNAPSHOT,Would expect a bar or line chart at monthly granularity,"select date_trunc('month', snapshot_time) as month,
+sum(transfer_count + buy_count + sell_count + burn_count + mint_count)
+from agents.smart.token_snapshot
+where name='aixbt'
+and month between '2024-12-01' and '2025-02-28'
+group by month
+order by month","Yes,
+possibly needs explanation that a ""transaction"" is any operation
+- transfer
+- buy
+- sell
+- burn
+- mint",,,,,,
+What are the total numbers of AIXBT and VaderAI holders each month between December 2024 and February 2025?,,,TOKEN_SNAPSHOT,Would expect a line chart at monthly granularity with two lines - one for each token,"select name,
+date_trunc('month', snapshot_time) as month,
+max_by(holder_count, snapshot_time) as holders
+from agents.smart.token_snapshot
+where lower(name) in ('aixbt', 'vaderai')
+and month between '2024-12-01' and '2025-02-28'
+group by name, month
+order by month;
+",Yes,,,,,,
+What was the $AIXBT price trend for February 2025?,,,TOKEN_SNAPSHOT,Would expect a line chart at daily granularity with price per day for AIXBT,"select date_trunc('day', snapshot_time) as day,
+max_by(usd_price, snapshot_time) as daily_price
+from agents.smart.token_snapshot
+where lower(name)='aixbt'
+and day between '2025-02-01' and '2025-02-28'
+group by day
+order by day;",Yes,,,,,,
+How has TVL for AIXBT changed in the time between December 2024 and February 2025?,,,TOKEN_SNAPSHOT,Would expect a line or area chart at daily or weekly granularity,"select date_trunc('day', snapshot_time) as day,
+max_by(tvl, snapshot_time) as tvl
+from agents.smart.token_snapshot
+where lower(name)='aixbt'
+and day between '2024-12-01' and '2025-02-28'
+group by day
+order by day;",Yes,,,,,,
+How has the market cap of the top 3 Virtuals agents changed in the time between December 2024 and February 2025?,,,TOKEN_SNAPSHOT,Would expect a line chart at daily or weekly granularity with three lines - one for each token,"with top3_agents as (
+    select token_address,
+    total_supply * usd_price as market_cap
+    from agents.smart.token_snapshot 
+    where snapshot_time < '2025-03-01'
+    order by snapshot_time desc, market_cap desc nulls last
+    limit 3
+)
+
+select token_address, name, date_trunc('day', snapshot_time) as day,
+max_by(total_supply, snapshot_time) * max_by(usd_price, snapshot_time) as daily_market_cap
+from agents.smart.token_snapshot
+where token_address in (select token_address from top3_agents)
+and day between '2024-12-01' and '2025-02-28'
+group by token_address, name, day
+order by day",Yes,,,,,,
+How many AIXBT tokens have been bridged between Base and Solana in the last 3 months?,,,,"COMPLEX
+Probably can't do yet:Would expect a bar chart with positive and negative bars at the daily level (for bridge in or bridge out) and probably also a line showing net position on second axis",,"No,
+
+need to add agents.smart.transfers table to the agent backend
+and explain that bridges to/from Solana are transfers to/from
+0x8d2de8d2f73F1F4cAB472AC9A881C9b123C79627",,,,,,
+What was the distribution of holders of VaderAI tokens at the end of February 2025?,,,RUNNING_TOKEN_BALANCE,"Could do this 2 ways - a simple pie chart, or a more complex histogram/distribution 
+
+RICCARDO: This probably requires binning of the results of the query,
+should I do it in the query or can the chart library do it by itself?","select holder,
+max_by(running_balance, balance_change_time) as balance
+from agents.smart.running_token_balances
+left join agents.smart.virtuals_agents on token_address=agent_token_address
+where lower(name)='vaderai'
+and balance_change_time <= '2025-02-28 23:00:00'
+group by holder
+having balance>0;",Yes,,,,,,
+Which token was more decentralized in terms of holders - AIXBT or VaderAI at the end of February 2025? ,,,RUNNING_TOKEN_BALANCE,"Similar to previous question but now with two for comparison, so a distribution chart or histogram with both
+
+RICCARDO: This probably requires binning of the results of the query,
+should I do it in the query or can the chart library do it by itself?","select name,
+holder,
+max_by(running_balance, balance_change_time) as balance
+from agents.smart.running_token_balances
+left join agents.smart.virtuals_agents on token_address=agent_token_address
+where lower(name) in ('vaderai', 'aixbt')
+and balance_change_time <= '2025-02-28 23:00:00'
+group by holder, name
+having balance>0
+order by name;",Yes,,,,,,
+"How many new holders of VaderAI have been added each day between December 2024 and 
+February 2025?",,,RUNNING_TOKEN_BALANCE,Would expect something like a bar chart of daily new holders as long as a cumulative line of total holders,"with balances_december as (
+    select holder,
+    max_by(running_balance, balance_change_time) as balance
+    from agents.smart.running_token_balances
+    left join agents.smart.virtuals_agents on token_address=agent_token_address
+    where lower(name)='vaderai'
+    and balance_change_time <= '2024-12-01 00:00:00'
+    group by holder
+    having balance>0
+),
+
+new_holders_with_first_date as (
+    select holder,
+    min(balance_change_time)::DATE as first_hold_date,
+    from agents.smart.running_token_balances
+    left join agents.smart.virtuals_agents on token_address=agent_token_address
+    where lower(name)='vaderai' 
+    and balance_change_time between '2024-12-01 01:00:00' and '2025-02-28 23:00:00'
+    and holder not in (select holder from balances_december)
+    and running_balance > 0
+    group by holder
+),
+
+new_holders_per_day as (
+    select first_hold_date,
+    count(*) as new_holders
+    from new_holders_with_first_date
+    group by first_hold_date
+)
+
+select first_hold_date as day,
+new_holders,
+sum(new_holders) over (order by day rows between unbounded preceding and current row) 
+    + (select count(*) from balances_december) as cumulative_holders
+from new_holders_per_day
+order by day",Yes,,,,,,
+How have holders of VaderAI changed each day between December 2024 and February 2025?,,,RUNNING_TOKEN_BALANCE,"COMPLEX
+An extention of the previous question but more difficult as need to show the following in something like a culmulative bar or area chart with a negative element:
+1. Existing holder
+2. Selling holder
+3. New holder
+4. Returning holder (sold before, bought again)","WITH starting_balances as (
+        select holder,
+        max_by(running_balance, balance_change_time) as starting_balance
+        from agents.smart.running_token_balances 
+        left join agents.smart.virtuals_agents on token_address=agent_token_address
+        where lower(name)='vaderai'
+        and balance_change_time <= '2024-12-01 00:00:00'
+        group by holder
+        having starting_balance > 0
+    ),
+
+    changes_by_day as (
+        select holder,
+        balance_change_time::DATE as day,
+        max_by(running_balance, balance_change_time) as running_balance
+        from agents.smart.running_token_balances
+        left join agents.smart.virtuals_agents on token_address=agent_token_address
+        where lower(name)='vaderai'
+        and balance_change_time between '2024-12-01 01:00:00' and '2025-02-28 23:00:00'
+        group by holder, day  
+    ),
+    
+    main AS (
+        SELECT
+          day,
+          holder,
+          starting_balance,
+          running_balance > 0 as is_positive,
+          LAG(is_positive, 1, starting_balance is not null)
+             OVER (PARTITION BY holder ORDER BY day) AS prev_positive,
+          MIN(
+            CASE WHEN starting_balance is not null then '2024-11-30'::DATE
+            when running_balance > 0 and starting_balance is null THEN day END
+          ) OVER (
+            PARTITION BY holder
+            ORDER BY day
+            ROWS BETWEEN UNBOUNDED PRECEDING AND 1 PRECEDING
+          ) AS earliest_positive_before_day
+      FROM changes_by_day left join starting_balances using(holder)
+    ),
+
+agg as (
+    SELECT
+        day,
+        SUM(
+          iff(prev_positive and not is_positive, 1, 0)
+        ) AS selling_holders,
+        SUM( 
+        iff(is_positive and earliest_positive_before_day is null and not prev_positive, 1, 0)
+        ) AS new_holders,
+        SUM( 
+        iff(is_positive and earliest_positive_before_day is not null and not prev_positive, 1, 0)
+        ) AS returning_holders
+    FROM main
+    GROUP BY day
+    )
+
+select day, 
+(select count(*) from starting_balances)
++ sum(new_holders + returning_holders - selling_holders)
+over(order by day rows between unbounded preceding and current row) as total_holders,
+selling_holders, new_holders, returning_holders
+from agg
+ORDER BY day;","Yes, but complex query ",,,,,,
+Which has been more volatile in the month of February 2025 - AIXBT or Vader?,,,TOKEN_SNAPSHOT,"COMPLEX
+This is a difficult calc since it is relative and needs interpretation, but it is a good example of a quant style question.
+Would expect a 2 line chart with each showing rolling 30 day annualized volatility calculated using daily log returns 
+
+OR could do a heatmap with each square in the grid being Agent x Month and the heat color being driven by % vol","WITH daily_prices as (
+    select name,
+    snapshot_time::DATE as date,
+    max_by(usd_price, snapshot_time) as daily_price
+    from agents.smart.token_snapshot
+    where lower(name) in ('vaderai', 'aixbt')
+    and usd_price is not null
+    group by name, date
+    ),
+
+    cte_log_returns AS (
+    SELECT
+        name,
+        date,
+        daily_price,
+        LN(daily_price / nullif(LAG(daily_price) ignore nulls 
+              OVER (partition by name ORDER BY date), 0)) as log_return
+    FROM daily_prices
+    ),
+
+    cte_rolling_vol AS (
+        SELECT
+        name,
+        date,
+        log_return,
+        STDDEV(log_return)
+            OVER (
+                partition by name
+                ORDER BY date
+                ROWS BETWEEN 29 PRECEDING AND CURRENT ROW
+            ) AS rolling_stddev_30
+        FROM cte_log_returns
+    )
+
+SELECT
+    name,
+    date,
+    rolling_stddev_30 * SQRT(365) AS annualized_vol_30day
+FROM cte_rolling_vol
+where date between '2025-02-01' and '2025-02-28'
+ORDER BY date;","Yes, but needs explaining on
+
+- that volatility at day T means annualized sample standard deviation
+  of daily log returns in the 30 days before T (STDDEV function 
+   in snowflake)
+- what are daily log returns -> ln(P_t/P_{t-1})  P=price
+- some logic to decide the daily price based on the hourly 
+  snapshot (eg. the last price)
+- what does it mean to annualize in this context -> multiply 
+  the sample stddev by sqrt(365)
+- that it needs to compute this volatility for each day in the requested timeframe",,,,,,
+What was the daily number of sales and value of sales of VaderAI in the time between December 2024 and February 2025?,,,TOKEN_SNAPSHOT,Would expect a line chart with two axes - number of Tx and Sum of value of Tx at the daily or monthly level,"select snapshot_time::DATE as day,
+sum(sell_count) as daily_sell_count,
+sum(sell_amount) as daily_sell_amount,
+daily_sell_amount*max_by(usd_price, snapshot_time) as usd_daily_sell_amount
+from agents.smart.token_snapshot
+where lower(name)='vaderai'
+and day between '2024-12-01' and '2025-02-28'
+group by day
+order by day;",Yes,,,,,,
+How many agents were launched per month during the last six months?,,,,,,,,,,,,
+What is the total market cap for all agents over the last 6 months?,,,,,,,,,,,,
