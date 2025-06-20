@@ -226,6 +226,27 @@ After that, find the database that you have just created, and select the schema,
   <img src="assets/0-stage.jpeg" alt="stage" style="width:350px;">
 </picture>
 
+
+Next you will need to add some files. For this you need to click on the `Files` button on the top right:
+
+<picture>
+  <img src="assets/1-add-files.jpeg" alt="stage" style="width:550px;">
+</picture>
+
+In the following window you will need to upload the following files:
+
+1. [unstructured-graphrag-kg.ipynb](for_stage/unstructured-graphrag-kg.ipynb)
+2. [anomaly-communities.ipynb](for_stage/anomaly-communities.ipynb)
+3. [structured-kg.ipynb](for_stage/structured-kg.ipynb)
+4. [running-token-balances.csv](for_stage/running-token-balances.csv)
+5. [token-snapshot.csv](for_stage/token-snapshot.csv)
+6. [virtuals-agents.csv](for_stage/virtuals-agents.csv)
+7. [relationalai.zip](for_stage/relationalai.zip)
+8. [token-transfers.csv](for_stage/token-transfers.csv)
+
+You can select them and drag and drop them on the window that opened. For your convenience all of these files are already located in the [for_stage/](/for_stage/) folder in the current repository.
+
+
 ## Load the Data into Snowflake Tables
 
 
