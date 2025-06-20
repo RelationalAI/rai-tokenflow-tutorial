@@ -8,7 +8,8 @@ USE ROLE ACCOUNTADMIN;
 -- no need to touch the rest of the code
 
 SET db_name='tf_db';
-SET schema_name= $db_name||'.tf_schema'; -- fully-qualified
+SET schema_name=$db_name||'.tf_schema'; -- fully-qualified
+SET stage_name=$schema_name||'.tf_stage'; -- fully-qualified
 SET wh_name='tf_wh';
 SET wh_size='X-SMALL';
 SET role_name='SYSADMIN';   -- what role will have access to the db/warehouse/schema etc.
@@ -35,6 +36,9 @@ GRANT USAGE ON WAREHOUSE identifier($wh_name) TO ROLE identifier($role_name);
 -- create a schema
 CREATE SCHEMA IF NOT EXISTS identifier($schema_name);
 GRANT USAGE ON SCHEMA identifier($schema_name) TO ROLE identifier($role_name);
+
+-- create a stage
+CREATE STAGE IF NOT EXISTS identifier($stage_name) DIRECTORY = ( ENABLE = true );
 
 -- privilege for notebook
 GRANT CREATE NOTEBOOK ON SCHEMA identifier($schema_name) TO ROLE identifier($role_name);
