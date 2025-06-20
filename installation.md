@@ -220,7 +220,11 @@ Once you have created the database, schema and stage you will now need to upload
 For this you need to login into Snowsight, and, on the left, click on `Data > Databases`.
 After that, find the database that you have just created, and select the schema, stages and then the stage that you created. In our example you would be clicking on `TF_DB > TF_SCHEMA > Stages > TF_STAGE` as shown in the picture:
 
-![stage](assets/0-stage.jpeg)
+
+
+<picture>
+  <img src="assets/0-stage.jpeg" alt="stage" style="width:50;">
+</picture>
 
 ## Load the Data into Snowflake Tables
 
