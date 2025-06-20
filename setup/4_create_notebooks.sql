@@ -2,6 +2,9 @@
 -- notebooks
 --
 USE ROLE ACCOUNTADMIN;
+USE DATABASE TF_DB;
+USE SCHEMA TF_SCHEMA;
+
 
 -- anomaly-communities.ipynb
 CREATE OR REPLACE NOTEBOOK anomaly_communities

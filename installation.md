@@ -246,26 +246,267 @@ In the following window you will need to upload the following files:
 
 You can select them and drag and drop them on the window that opened. For your convenience all of these files are already located in the [for_stage/](/for_stage/) folder in the current repository.
 
+Once you dragged and dropped the files click on the `upload` button.
+
+<picture>
+  <img src="assets/2-upload.jpg" alt="stage" style="width:350px;">
+</picture>
+
+Your stage will now look something like this:
+
+<picture>
+  <img src="assets/3-stage-files.jpg" alt="stage" style="width:550px;">
+</picture>
+
 
 ## Load the Data into Snowflake Tables
 
+Once you have all the files in the stage you can now go ahead and import the data into Snowflake tables.
+
+For this you need to run the following commands in a Snowflake SQL Worksheet. For your convenience, all of the code is located in [import_data.sql](setup/3_import_data.sql).
+
+```sql
+--
+-- data
+--
+USE ROLE ACCOUNTADMIN;
+USE DATABASE TF_DB;
+USE SCHEMA TF_SCHEMA;
+
+-- token-transfers.csv
+CREATE OR REPLACE TABLE TOKEN_TRANSFERS (
+    LAUNCHPAD VARCHAR,
+    TOKEN VARCHAR,
+    SYMBOL VARCHAR,
+    NAME VARCHAR,
+    BLOCK_NUMBER NUMBER,
+    BLOCK_TIMESTAMP DATETIME,
+    TX_HASH VARCHAR,
+    FROM_ADDRESS VARCHAR,
+    L1_FEE NUMBER,
+    L2_FEE NUMBER,
+    SENDER VARCHAR,
+    RECEIVER VARCHAR,
+    AMOUNT NUMBER
+);
+
+ALTER TABLE TF_DB.TF_SCHEMA.TOKEN_TRANSFERS SET CHANGE_TRACKING = TRUE;
+
+COPY INTO TOKEN_TRANSFERS
+    from '@"TF_DB"."TF_SCHEMA"."TF_STAGE"/token-transfers.csv'
+    FILE_FORMAT = (
+        TYPE = CSV
+        --COMPRESSION = BZ2
+        SKIP_HEADER = 1
+        NULL_IF = '\\N'
+        EMPTY_FIELD_AS_NULL = TRUE
+        DATE_FORMAT = AUTO --'YYYY-MM-DD HH:MM:SS'
+        FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+        ESCAPE = '\\'
+    )
+    ON_ERROR = CONTINUE
+;
+
+
+
+-- virtuals-agents.csv
+CREATE OR REPLACE TABLE VIRTUALS_AGENTS (
+    AGENT_TOKEN_ADDRESS VARCHAR,
+    NAME VARCHAR,
+    SYMBOL VARCHAR,
+    DESCRIPTION VARCHAR,
+    CREATED_AT DATETIME,
+    LP VARCHAR,
+    TBA VARCHAR,
+    WALLETS VARCHAR,
+    IS_PUBLIC BOOLEAN,
+    IS_PREMIUM BOOLEAN,
+    X_USERNAME VARCHAR,
+    STATUS VARCHAR,
+    EXTRA_DATA VARCHAR,
+    ADDED_AT DATETIME
+);
+
+ALTER TABLE TF_DB.TF_SCHEMA.VIRTUALS_AGENTS SET CHANGE_TRACKING = TRUE;
+
+COPY INTO VIRTUALS_AGENTS
+    from '@"TF_DB"."TF_SCHEMA"."TF_STAGE"/virtuals-agents.csv'
+    FILE_FORMAT = (
+        TYPE = CSV
+        SKIP_HEADER = 1
+        NULL_IF = '\\N'
+        EMPTY_FIELD_AS_NULL = TRUE
+        DATE_FORMAT = AUTO --'YYYY-MM-DD HH:MM:SS'
+        FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+        ESCAPE = '\\'
+    )
+    ON_ERROR = CONTINUE
+;
+
+
+
+-- token-snapshot.csv
+CREATE TABLE TOKEN_SNAPSHOT (
+    NAME VARCHAR,
+    TOKEN_ADDRESS VARCHAR,
+    SNAPSHOT_TIME DATETIME,
+    TRANSFER_COUNT NUMBER,
+    TRANSFER_AMOUNT NUMBER,
+    BUY_COUNT NUMBER,
+    BUY_AMOUNT NUMBER,
+    SELL_COUNT NUMBER,
+    SELL_AMOUNT NUMBER,
+    MINT_COUNT NUMBER,
+    MINT_AMOUNT NUMBER,
+    BURN_COUNT NUMBER,
+    BURN_AMOUNT NUMBER,
+    TOTAL_SUPPLY NUMBER,
+    HOLDER_COUNT NUMBER,
+    USD_PRICE NUMBER,
+    TVL NUMBER
+);
+
+ALTER TABLE TF_DB.TF_SCHEMA.TOKEN_SNAPSHOT SET CHANGE_TRACKING = TRUE;
+
+COPY INTO TOKEN_SNAPSHOT
+    from '@"TF_DB"."TF_SCHEMA"."TF_STAGE"/token-snapshot.csv'
+    FILE_FORMAT = (
+        TYPE = CSV
+        SKIP_HEADER = 1
+        NULL_IF = '\\N'
+        EMPTY_FIELD_AS_NULL = TRUE
+        DATE_FORMAT = AUTO --'YYYY-MM-DD HH:MM:SS'
+        FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+        ESCAPE = '\\'
+    )
+    ON_ERROR = CONTINUE
+;
+
+
+
+
+-- running-token-balances.csv
+CREATE TABLE RUNNING_TOKEN_BALANCES (
+    TOKEN_ADDRESS VARCHAR,
+    HOLDER VARCHAR,
+    BALANCE_CHANGE_TIME DATETIME,
+    RUNNING_BALANCE NUMBER
+);
+
+ALTER TABLE TF_DB.TF_SCHEMA.RUNNING_TOKEN_BALANCES SET CHANGE_TRACKING = TRUE;
+
+COPY INTO RUNNING_TOKEN_BALANCES
+    from '@"TF_DB"."TF_SCHEMA"."TF_STAGE"/running-token-balances.csv'
+    FILE_FORMAT = (
+        TYPE = CSV
+        SKIP_HEADER = 1
+        NULL_IF = '\\N'
+        EMPTY_FIELD_AS_NULL = TRUE
+        DATE_FORMAT = AUTO --'YYYY-MM-DD HH:MM:SS'
+        FIELD_OPTIONALLY_ENCLOSED_BY = '"'
+        ESCAPE = '\\'
+    )
+    ON_ERROR = CONTINUE
+;
+```
 
 
 ## Create Notebooks
 
+Next, you will create the notebooks based on the `.ipynb` sources that you uploaded on stage.
+
+You can do this by running the following commands in a Snowflake Worksheet.
+For your convenience, the whole code is available in [create_notebooks.sql](setup/4_create_notebooks.sql).
+
 ```sql
+--
+-- notebooks
+--
+USE ROLE ACCOUNTADMIN;
+USE DATABASE TF_DB;
+USE SCHEMA TF_SCHEMA;
+
+
+-- anomaly-communities.ipynb
 CREATE OR REPLACE NOTEBOOK anomaly_communities
     FROM '@tf_db.tf_schema.tf_stage'
     MAIN_FILE = 'anomaly-communities.ipynb'
     QUERY_WAREHOUSE = $wh_name
     WAREHOUSE = $wh_name
     ;
+
+-- structured-kg.ipynb
+CREATE OR REPLACE NOTEBOOK structured_kg
+    FROM '@tf_db.tf_schema.tf_stage'
+    MAIN_FILE = 'structured-kg.ipynb'
+    QUERY_WAREHOUSE = $wh_name
+    WAREHOUSE = $wh_name
+    ;
 ```
 
->>>> EXTERNAL ACCESS! S3_RAI_INTERNAL_BUCKET_EGRESS_INTEGRATION
+### Setting up Packages and External Access for the Notebooks
 
 
-## Load `relationalai.zip` Python Package
+> [!NOTE]
+> You need to do the following for every notebook that you would like to use
+
+#### External Access
+
+Once you have created the notebooks, you need to set up external access for them.
+This is needed by the RelationalAI Native App in order to communicate with the RelationalAI backend.
+
+More specifically, you will need to enable the `S3_RAI_INTERNAL_BUCKET_EGRESS_INTEGRATION`.
+
+For this, you need to click on the `...` on the top right of the page when viewing a Notebook and then on `Notebook settings`:
+
+<picture>
+  <img src="assets/10-notebook-settings.jpg" alt="stage" style="width:350px;">
+</picture>
+
+Next, you need to click on the  toggle-on the `External access` tab on top and toggle the `S3_RAI_INTERNAL_BUCKET_EGRESS_INTEGRATION` to on. Next click `Save`.
+
+<picture>
+  <img src="assets/11-external-access.jpg" alt="stage" style="width:350px;">
+</picture>
+
+
+#### Loading Python Packages
+
+The Notebooks containing the code for the various use cases use some Python packages.
+These packages need to be installed before the Notebook can run.
+
+To install such packages you should click on the top `Packages` and then type the name of each package in the search box and selecting the package. You should install the following packages:
+
+* matplotlib
+* pandas
+* networkx
+* numpy
+
+<picture>
+  <img src="assets/13-python-packages.jpg" alt="stage" style="width:300px;">
+</picture>
+
+Next, click `Save` for the packages to be installed.
+
+#### Loading the `relationalai.zip` Python Package
+
+Finally, you will need to install the `relationalai.zip` Python package that is needed to
+interface with the RelationalAI Native App. The process is somewhat similar with the regular Python packages that
+you just installed, except you will be clicking on the `Stage Packages` tab on top and specifying the path to the `relationalai.zip` package.
+
+The path needs to be fully qualified. For example `@TF_DB.TF_SCHEMA.TF_STAGE/relationalai.zip`:
+
+<picture>
+  <img src="assets/14-import-relationalaizip.jpg" alt="stage" style="width:300px;">
+</picture>
+
+The system checks whether the path contains a valid Python package and, if yes, a green check box appears.
+Click `Import` to import the `relationalai.zip` package.
+
+
+## Completed
+
+You can now pick a Python Notebook from the Notebooks section on the left in Snowsight and run it!
 
 
 
