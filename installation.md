@@ -223,7 +223,7 @@ After that, find the database that you have just created, and select the schema,
 
 
 <picture>
-  <img src="assets/0-stage.jpeg" alt="stage" style="width:50;">
+  <img src="assets/0-stage.jpeg" alt="stage" style="width:350px;">
 </picture>
 
 ## Load the Data into Snowflake Tables
