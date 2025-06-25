@@ -28,6 +28,7 @@ This repository demonstrates how to use the **RelationalAI GNN Engine** for a li
 * `LinkPrediction_Tokenflow.ipynb` — Notebook demonstrating link prediction using the GNN engine
 * `load_to_snowflake.py` — Helper functions for uploading data to Snowflake (used in the preprocessing notebook)
 * `rai_gnns_experimental-0.1.0-py3-none-any.whl` — Wheel file for the RelationalAI GNN SDK
+* `rai_gnns_experimental.zip` — Zip file to upload the python SDK to be installed in Snowflake notebooks. See instructions [here](INSTALLING_SDK_TO_SNOWFLAKE.md)
 * `GNN_SDK_DOCUMENTATION.md` — Documentation for installing and using the GNN SDK
 * `.env` — Example configuration file for connecting to Snowflake
 
