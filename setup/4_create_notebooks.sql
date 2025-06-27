@@ -10,22 +10,22 @@ USE SCHEMA TF_SCHEMA;
 CREATE OR REPLACE NOTEBOOK anomaly_communities
     FROM '@tf_db.tf_schema.tf_stage'
     MAIN_FILE = 'anomaly-communities.ipynb'
-    QUERY_WAREHOUSE = $wh_name
-    WAREHOUSE = $wh_name
+    QUERY_WAREHOUSE = TF_WH
+    WAREHOUSE = TF_WH
     ;
 
 -- structured-kg.ipynb
 CREATE OR REPLACE NOTEBOOK structured_kg
     FROM '@tf_db.tf_schema.tf_stage'
     MAIN_FILE = 'structured-kg.ipynb'
-    QUERY_WAREHOUSE = $wh_name
-    WAREHOUSE = $wh_name
+    QUERY_WAREHOUSE = TF_WH
+    WAREHOUSE = TF_WH
     ;
 
 -- structured-kg.ipynb
 CREATE OR REPLACE NOTEBOOK gnn_link_prediction
     FROM '@tf_db.tf_schema.tf_stage'
     MAIN_FILE = 'gnn-link-prediction.ipynb'
-    QUERY_WAREHOUSE = $wh_name
-    WAREHOUSE = $wh_name
+    QUERY_WAREHOUSE = TF_WH
+    WAREHOUSE = TF_WH
     ;
