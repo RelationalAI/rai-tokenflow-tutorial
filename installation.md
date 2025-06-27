@@ -647,6 +647,9 @@ To install such packages you should click on the top `Packages` and then type th
 
 Next, click `Save` for the packages to be installed.
 
+> [!NOTE]
+> For your convenience, a file called `environment.yml` is included in the files that are meant to be uploaded to the stage. This file already specifies all the above packages and therefore the notebooks should already have the necessary packages installed. If one or more packages are not installed please follow the process above to manually install them.
+
 #### Loading the `relationalai.zip` and `rai_gnns_experimental.zip` Python Packages
 
 Finally, you will need to install the `relationalai.zip` Python package that is needed to
