@@ -475,12 +475,20 @@ Next, you need to click on the  toggle-on the `External access` tab on top and t
 The Notebooks containing the code for the various use cases use some Python packages.
 These packages need to be installed before the Notebook can run.
 
-To install such packages you should click on the top `Packages` and then type the name of each package in the search box and selecting the package. You should install the following packages:
+To install such packages you should click on the top `Packages` and then type the name of each package in the`Anaconda Packages` search box and selecting the package. You should install the following packages:
 
-* matplotlib
-* pandas
-* networkx
-* numpy
+* `matplotlib`
+* `pandas`
+* `networkx`
+* `numpy`
+* `certifi`
+* `cryptography`
+* `pydantic`
+* `python-dotenv`
+* `pydot`
+* `sqlalchemy`
+* `tabulate`
+* `python-graphviz`
 
 <picture>
   <img src="assets/13-python-packages.jpg" alt="stage" style="width:300px;">
