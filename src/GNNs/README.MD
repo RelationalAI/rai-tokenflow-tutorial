@@ -23,7 +23,7 @@ This repository demonstrates how to use the **RelationalAI GNN Engine** for a li
 ---
 
 ## 📁 Repository Contents
-
+* `create_data.sql` - SQL script to prepare tokenflow data in Snowflake
 * `preprocess_tokenflow_data.ipynb` — Notebook to preprocess and upload the Tokenflow dataset to Snowflake
 * `LinkPrediction_Tokenflow.ipynb` — Notebook demonstrating link prediction using the GNN engine. Notebook shows how you can communicate with the GNN engine localy 
 * `LinkPrediction_Tokenflow_SF.ipynb` — Notebook demonstrating link prediction using the GNN engine. This is a Snowflake notebook.
