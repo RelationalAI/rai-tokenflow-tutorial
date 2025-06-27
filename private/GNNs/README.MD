@@ -9,7 +9,7 @@ This repository demonstrates how to use the **RelationalAI GNN Engine** for a li
 ## ✅ Prerequisites
 
 1. **Install the RelationalAI Experimental Application**
-   Make sure the RelationalAI experimental application is installed in your Snowflake account.
+   Make sure the RelationalAI experimental application is installed in your Snowflake account.Follow the instructions provided in our documentation [here](https://docs.relational.ai/manage/install). Make sure to grant the application the privilege BIND SERVICE ENDPOINT, which is required to use the GNNs experimental capabilities in the RAI Native App.
 
 2. **Preprocess the Tokenflow Dataset**
    Run the `preprocess_tokenflow_data.ipynb` notebook to generate the processed dataset required for this tutorial.
