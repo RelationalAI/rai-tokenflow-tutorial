@@ -10,12 +10,23 @@ We will work with four different use cases, all geared towards typical AI Engine
 
 * [**Building a Knowledge Graph over Structured Data.**](#building-a-knowledge-graph-over-structured-data) A knowledge graph over structured data is important because it enables richer, more flexible, and context-aware understanding, integration, and reasoning over data than traditional databases or flat tables can provide. Structured data (e.g., rows in a database) often lacks explicit meaning beyond column names. A knowledge graph adds semantic relationships—e.g., that "Paris" is not just a string in a "City" column, but a specific instance of a geographic location in France. This helps machines and humans understand the meaning of the data more deeply.
 
+You can find the details in the [structured-kg.ipynb](/for_stage/structured-kg.ipynb) Python Notebook.
+
 * [**Building a Knowledge Graph over Unstructured Data.**](#building-a-knowledge-graph-over-unstructured-data) Building a knowledge graph over unstructured (textual) data is important because it transforms raw, messy text into structured, connected knowledge that machines can understand, query, and reason over. Most of the world’s data—emails, documents, articles, reports—is unstructured, and hard to use directly for analysis or automation. A knowledge graph helps unlock the value hidden in text by extracting and linking entities, relationships, and facts. It also enables the users to get answers easily and efficiently by asking natural language questions.
+
+You can find the details in the [unstructured-graphrag-kg.ipynb](/for_stage/unstructured-graphrag-kg.ipynb) Python Notebook.
+
 
 * [**Predicting Transfer Transactions.**](#predicting-transfer-transactions) Predicting tasks is important for a data scientist because it lies at the heart of what data science is designed to do: extract actionable insights and drive decisions through forecasting, classification, or estimation. Predictive tasks turn raw data into forward-looking value—helping businesses, researchers, and policymakers anticipate what’s likely to happen and act accordingly. Predictive tasks involve using historical data to forecast future outcomes or classify unknown instances. Common examples include predicting customer churn, forecasting sales, classifying whether an email is spam, estimating time to delivery, detecting potential fraud. In our use case we will predict future transfer transactions using blockchain data from [Tokenflow](https://tokenflow.live).
 
+You can find the details in the [gnn-link-prediction.ipynb](/for_stage/gnn-link-prediction.ipynb) Python Notebook.
+
+
 * [**Detecting Anomalies.**](#detecting-anomalies) Detecting anomalies is important because anomalies often indicate critical, unexpected, or risky events that require attention. These events may signal fraud, failures, security breaches, quality issues, or operational problems—and catching them early can prevent major consequences. Anomaly detection is the process of identifying data points or patterns that deviate significantly from expected behavior. These anomalies can be point anomalies (a single outlier, e.g., a sudden spike in temperature), contextual anomalies (unusual in a given context, e.g. a login at 3 AM), and,
 collective anomalies (a group of data behaving abnormally, e.g., anomalous communites of traders that may be colluding). In our use case, we will detect anomalous communities with the blockchain data from [Tokenflow](https://tokenflow.live).
+
+You can find the details in the [anomaly-communities.ipynb](/for_stage/anomaly-communities.ipynb) Python Notebook.
+
 
 
 ## Tokenflow Dataset
