@@ -33,7 +33,7 @@ You can find the details in the [anomaly-communities.ipynb](/for_stage/anomaly-c
 
 Here is a description of the data files from [Tokenflow](https://tokenflow.live) containing blockhain data. You can find all the data under the `data/` directory.
 
-### agents.csv
+### `agents.csv`
 Stores metadata on AI-driven blockchain-based agents with agent data, use this to lookup information about agents. It contains the following columns:
 
 | Field Name       | Type              | Description                                                                   |
@@ -65,7 +65,7 @@ Stores metadata on AI-driven blockchain-based agents with agent data, use this t
 | LANGUAGE         | string            | Language(s) the agent interacts in                                            |
 | EXTRA_DATA       | variant           | Additional metadata stored in JSON format                                     |
 
-### token-transfers.csv
+### `token-transfers.csv`
 Records token transfers between blockchain addresses, use this to answer questions about token transfers. It contains the following columns:
 
 | Field Name      | Type              | Description                                         |
@@ -84,7 +84,7 @@ Records token transfers between blockchain addresses, use this to answer questio
 | RECEIVER        | string            | Address receiving the tokens                        |
 | AMOUNT          | number            | Amount of tokens transferred (raw blockchain units) |
 
-### token-trades.csv
+### `token-trades.csv`
 Records token swap transactions on blockchain-based liquidity pools. It contains the following columns:
 
 | Field Name         | Type              | Description                                                                    |
@@ -106,7 +106,7 @@ Records token swap transactions on blockchain-based liquidity pools. It contains
 | SELL_AMOUNT        | number            | Amount of the sold token in raw blockchain units                               |
 
 
-### token-prices.csv
+### `token-prices.csv`
 Stores historical token price and TVL data. It contains the following columns:
 
 | Field Name | Type              | Description                                           |
@@ -119,7 +119,7 @@ Stores historical token price and TVL data. It contains the following columns:
 | USD_PRICE  | float             | The price of the token in USD                         |
 | TVL        | float             | The total value locked (TVL) in the token's ecosystem |
 
-### virtuals-agents.csv
+### `virtuals-agents.csv`
 Stores metadata on virtual agents derived from blockchain data. This view combines various agent attributes for further lookup.
 
 | Field Name          | Type              | Description                                                               |
@@ -139,7 +139,7 @@ Stores metadata on virtual agents derived from blockchain data. This view combin
 | EXTRA_DATA          | variant           | Additional unmapped metadata stored in JSON format                        |
 | ADDED_AT            | timestamp         | Timestamp when the agent was added to the system                          |
 
-### token-snapshot.csv
+### `token-snapshot.csv`
 Captures a snapshot of various token metrics and statistics at a specific moment in time.
 
 | Field Name      | Type              | Description                                            |
@@ -163,7 +163,7 @@ Captures a snapshot of various token metrics and statistics at a specific moment
 | TVL             | float             | Total value locked in the token's ecosystem            |
 (All the numbers in this table are referred to the snapshot_time hour).
 
-### running-token-balances.csv
+### `running-token-balances.csv`
 Tracks the ongoing balance changes for each token by recording when a balance change occurs.
 
 | Field Name          | Type              | Description                                      |
