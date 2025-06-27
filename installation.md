@@ -103,7 +103,7 @@ Once the building completes you will now have a file called `relationalai.zip` i
 
 ## Building the `rai_gnns_experimental.zip` package
 
-Similarly, for certain use cases that you'll be working through the Snowflake Notebook you will need to access certain RelationalAI services through the GNN Python SDK. To this end, you will need the `rai_gnns_experimental.zip` file.
+Similarly, for certain use cases that you'll be working through the Snowflake Notebook you will need to access certain RelationalAI services through the GNN Python SDK. To this end, you will need the `rai_gnns_experimental.zip` file.b
 
 > [!NOTE]
 > You may ask a RelationalAI representative to give you this file if you don't have access to the source code. For your convenience a version has been provided in the [/for_stage](/for_stage/) folder but it is advisable to ask a RelationalAI representative for the latest version.
@@ -147,8 +147,6 @@ SET stage_full_name = $schema_full_name||'.'||$stage_name;
 SET wh_name = 'tf_wh';
 SET wh_size = 'X-SMALL';
 SET role_name = 'SYSADMIN';   -- what role will have access to the db/warehouse/schema etc.
-SET net_rule_name='tf_network_rule';
-SET ext_integration_name='tf_external_integration';
 ```
 
 
@@ -262,6 +260,20 @@ In the following window you will need to upload the following files:
 6. [virtuals-agents.csv](for_stage/virtuals-agents.csv)
 7. [relationalai.zip](for_stage/relationalai.zip)
 8. [token-transfers.csv](for_stage/token-transfers.csv)
+
+[`environment.yml`](for_stage/environment.yml)
+[unstructured-graphrag-kg.ipynb](for_stage/unstructured-graphrag-kg.ipynb)
+[gnn-link-prediction.ipynb](for_stage/gnn-link-prediction.ipynb)
+[rai_gnns_experimental.zip](for_stage/rai_gnns_experimental.zip)
+[token-trades.csv](for_stage/token-trades.csv)
+[anomaly-communities.ipynb](for_stage/anomaly-communities.ipynb)
+[structured-kg.ipynb](for_stage/structured-kg.ipynb)
+[running-token-balances.csv](for_stage/running-token-balances.csv)
+[token-snapshot.csv](for_stage/token-snapshot.csv)
+[virtuals-agents.csv](for_stage/virtuals-agents.csv)
+[relationalai.zip](for_stage/relationalai.zip)
+[token-transfers.csv](for_stage/token-transfers.csv)
+
 
 You can select them and drag and drop them on the window that opened. For your convenience all of these files are already located in the [for_stage/](/for_stage/) folder in the current repository.
 
