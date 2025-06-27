@@ -584,6 +584,14 @@ CREATE OR REPLACE NOTEBOOK gnn_link_prediction
     QUERY_WAREHOUSE = TF_WH
     WAREHOUSE = TF_WH
     ;
+
+-- unstructured-graphrag-kg.ipynb
+CREATE OR REPLACE NOTEBOOK graphrag_kg_qa
+    FROM '@tf_db.tf_schema.tf_stage'
+    MAIN_FILE = 'unstructured-graphrag-kg.ipynb'
+    QUERY_WAREHOUSE = TF_WH
+    WAREHOUSE = TF_WH
+    ;
 ```
 
 ### Setting up Packages and External Access for the Notebooks
