@@ -73,10 +73,11 @@ You will also need your account to have the RAI GraphRAG App for Snowflake insta
 
 For certain use cases you will be working through a Snowflake Notebook. To this end, you will need a Python package that allows for interfacing between the Snowflake Notebooks. We will show you how and where to upload this package at a later step together with the code and the data.
 
-For now, you can build this package following the steps below in a shell. You will need `Python >= 3.9` and `pip` installed for the following to work.
-
 > [!NOTE]
-> You may ask a Relational AI representative to give you this file if you don't have access to the source code.
+> You may ask a RelationalAI representative to give you this file if you don't have access to the source code. For your convenience a version has been provided in the [/for_stage](/for_stage/) folder but it is advisable to ask a RelationalAI representative for the latest version.
+
+You can build this package following the steps below in a shell. You will need `Python >= 3.9` and `pip` installed for the following to work.
+
 
 ```sh
 # clone the code
@@ -100,6 +101,24 @@ deactivate
 Once the building completes you will now have a file called `relationalai.zip` in the current folder. Keep this file as we will upload it later on to a Snowflake stage.
 
 
+## Building the `rai_gnns_experimental.zip` package
+
+Similarly, for certain use cases that you'll be working through the Snowflake Notebook you will need to access certain RelationalAI services through the GNN Python SDK. To this end, you will need the `rai_gnns_experimental.zip` file.
+
+> [!NOTE]
+> You may ask a RelationalAI representative to give you this file if you don't have access to the source code. For your convenience a version has been provided in the [/for_stage](/for_stage/) folder but it is advisable to ask a RelationalAI representative for the latest version.
+
+You can build this package following the steps below in a shell.
+
+```sh
+git clone https://github.com/RelationalAI/gnn-learning-engine.git
+
+cd gnn-learning-engine
+
+zip -r rai_gnns_experimental rai_gnns_experimental
+```
+
+Once this process completes, you will now have a file called `rai_gnns_experimental.zip` in the current folder. Keep this file as we will upload it later on to a Snowflake stage.
 
 ## Set up Database Objects
 
