@@ -515,13 +515,13 @@ To install such packages you should click on the top `Packages` and then type th
 
 Next, click `Save` for the packages to be installed.
 
-#### Loading the `relationalai.zip` Python Package
+#### Loading the `relationalai.zip` and `rai_gnns_experimental.zip` Python Packages
 
 Finally, you will need to install the `relationalai.zip` Python package that is needed to
 interface with the RelationalAI Native App. The process is somewhat similar with the regular Python packages that
 you just installed, except you will be clicking on the `Stage Packages` tab on top and specifying the path to the `relationalai.zip` package.
 
-The path needs to be fully qualified. For example `@TF_DB.TF_SCHEMA.TF_STAGE/relationalai.zip`:
+The path needs to be fully qualified. For example `@TF_DB.TF_SCHEMA.TF_STAGE/relationalai.zip` and `@TF_DB.TF_SCHEMA.TF_STAGE/rai_gnns_experimental.zip`:
 
 <picture>
   <img src="assets/14-import-relationalaizip.jpg" alt="stage" style="width:300px;">

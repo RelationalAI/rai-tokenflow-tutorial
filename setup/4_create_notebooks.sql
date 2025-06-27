@@ -21,3 +21,11 @@ CREATE OR REPLACE NOTEBOOK structured_kg
     QUERY_WAREHOUSE = $wh_name
     WAREHOUSE = $wh_name
     ;
+
+-- structured-kg.ipynb
+CREATE OR REPLACE NOTEBOOK gnn_link_prediction
+    FROM '@tf_db.tf_schema.tf_stage'
+    MAIN_FILE = 'gnn-link-prediction.ipynb'
+    QUERY_WAREHOUSE = $wh_name
+    WAREHOUSE = $wh_name
+    ;
