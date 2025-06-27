@@ -1,7 +1,7 @@
 # Running the SDK in a Snowflake Notebook
 
 This guide explains how to run the GNN SDK inside a Snowflake notebook. Follow the steps below to reproduce the setup.
-
+Notebook example: https://app.snowflake.com/us-east-1/zgc45332/#/notebooks/GNN_TOKENFLOW.PUBLIC.GNN_LINK_PREDICTION
 ---
 
 ## ✅ Step 1: Package the SDK
@@ -117,7 +117,7 @@ Switch to the **Stage Packages** tab.
 For the package path, use:
 
 ```
-GNN_TOKENFLOW.PUBLIC.ILIAS_TEST_UPLOAD_PACKAGE/rai_gnns_experimental.zip
+@GNN_TOKENFLOW.PUBLIC.ILIAS_TEST_UPLOAD_PACKAGE/rai_gnns_experimental.zip
 ```
 
 Click **Import**.
@@ -126,3 +126,7 @@ Click **Import**.
 > If everything works, the status will stay at *"Pending"* for 10–20 minutes, and then show as *"Installed"*.
 
 ---
+
+⚠️ Warning: To reinstall the package make sure you end the session first.
+
+
