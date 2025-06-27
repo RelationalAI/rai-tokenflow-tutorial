@@ -496,18 +496,19 @@ These packages need to be installed before the Notebook can run.
 
 To install such packages you should click on the top `Packages` and then type the name of each package in the`Anaconda Packages` search box and selecting the package. You should install the following packages:
 
-* `matplotlib`
-* `pandas`
-* `networkx`
-* `numpy`
 * `certifi`
 * `cryptography`
+* `gravis`
+* `matplotlib`
+* `networkx`
+* `numpy`
+* `pandas`
 * `pydantic`
-* `python-dotenv`
 * `pydot`
+* `python-dotenv`
+* `python-graphviz`
 * `sqlalchemy`
 * `tabulate`
-* `python-graphviz`
 
 <picture>
   <img src="assets/13-python-packages.jpg" alt="stage" style="width:300px;">

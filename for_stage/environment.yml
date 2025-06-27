@@ -4,6 +4,7 @@ channels:
 dependencies:
   - certifi=*
   - cryptography=*
+  - gravis=*
   - matplotlib=*
   - networkx=*
   - numpy=*
