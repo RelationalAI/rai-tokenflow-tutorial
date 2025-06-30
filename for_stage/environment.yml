@@ -1,0 +1,17 @@
+name: app_environment
+channels:
+  - snowflake
+dependencies:
+  - certifi=*
+  - cryptography=*
+  - gravis=*
+  - matplotlib=*
+  - networkx=*
+  - numpy=*
+  - pandas=*
+  - pydantic=*
+  - pydot=*
+  - python-dotenv=*
+  - python-graphviz=*
+  - sqlalchemy=*
+  - tabulate=*
