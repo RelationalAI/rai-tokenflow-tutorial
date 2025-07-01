@@ -10,6 +10,7 @@ dependencies:
   - numpy=*
   - pandas=*
   - pydantic=*
+  - pydantic-core
   - pydot=*
   - python-dotenv=*
   - python-graphviz=*
